@@ -1,0 +1,16 @@
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "1234"
+      MYSQL_DATABASE: "daily-diet"
+      MYSQL_ROOT_PASSWORD: "1234"
+    ports:
+      - "3306:3306"
+    expose:
+      # Opens port on the container
+      - "3306"
+    volumes:
+      - C:\Users\PrimoGamesSP\desktop\mysql:\var\lib\mysql
