@@ -5,12 +5,14 @@ from sqlalchemy import text
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "my_secret_key"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234@127.0.0.1:3306/daily-diet'
+app.config["SECRET_KEY"] = "my_secret_key"
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    "mysql+pymysql://root:1234@127.0.0.1:3306/daily-diet"
+)
 db.init_app(app)
 
 
-@app.route("/diet", methods=['POST'])
+@app.route("/diet", methods=["POST"])
 def create_meal():
     data = request.json
     name = data.get("name")
@@ -26,22 +28,41 @@ def create_meal():
     return jsonify({"message": "User {meal.id} Registred meal with success!"})
 
 
-@app.route("/diet", methods=['GET'])
+@app.route("/diet", methods=["GET"])
 def read_meals():
     meals = Meal.query.all()
 
     meals_list = []
 
     for meal in meals:
-        meals_list.append({
-            "id": meal.id,
-            "name": meal.name,
-            "description": meal.description,
-            "date_hour": meal.date_hour,
-            "in_diet": meal.in_diet
-        })
+        meals_list.append(
+            {
+                "id": meal.id,
+                "name": meal.name,
+                "description": meal.description,
+                "date_hour": meal.date_hour,
+                "in_diet": meal.in_diet,
+            }
+        )
 
     return jsonify({"Tasks": meals_list})
+
+
+@app.route("/diet/<int:id>", methods=["GET"])
+def read_meal(id):
+    meal = Meal.query.get(id)
+
+    if meal:
+        return jsonify(
+            {
+                "id": meal.id,
+                "name": meal.name,
+                "description": meal.description,
+                "date_hour": meal.date_hour,
+                "in_diet": meal.in_diet,
+            })
+
+    return jsonify({"message": "User not found"}), 404
 
 
 # Reseta o AUTO_INCREMENT para que a cada inicialização o primeiro meal criado seja de id = 1
@@ -57,5 +78,5 @@ def read_meals():
 #     return jsonify({"message": "IDs resetados"})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
