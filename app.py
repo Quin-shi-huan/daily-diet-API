@@ -19,13 +19,13 @@ def create_meal():
     description = data.get("description")
     in_diet = data.get("in_diet")
 
-    if not name:
-        return jsonify({"message": "Name required"}), 400
+    if not name or not description:
+        return jsonify({"message": "Name and Description is required!"}), 400
 
     meal = Meal(name=name, description=description, in_diet=in_diet)
     db.session.add(meal)
     db.session.commit()
-    return jsonify({"message": "User {meal.id} Registred meal with success!"})
+    return jsonify({"message": "User Registred meal with success!"})
 
 
 @app.route("/diet", methods=["GET"])
@@ -45,7 +45,7 @@ def read_meals():
             }
         )
 
-    return jsonify({"Tasks": meals_list})
+    return jsonify({"Meals": meals_list})
 
 
 @app.route("/diet/<int:id>", methods=["GET"])
@@ -62,12 +62,12 @@ def read_meal(id):
                 "in_diet": meal.in_diet,
             })
 
-    return jsonify({"message": "User not found"}), 404
+    return jsonify({"message": "Meal not found"}), 404
 
 
 # Reseta o AUTO_INCREMENT para que a cada inicialização o primeiro meal criado seja de id = 1
 # @app.route("/reset_ids", methods=['GET'])
-# def reset_ids():
+# def reset_ids():a
 #     # Limpa todos os registros da tabela
 #     db.session.execute(text("DELETE FROM meal"))
 
@@ -76,6 +76,45 @@ def read_meal(id):
 
 #     db.session.commit()
 #     return jsonify({"message": "IDs resetados"})
+
+
+@app.route("/diet/<int:id>", methods=['PUT'])
+def update_meal(id):
+    meal = Meal.query.get(id)
+    data = request.json
+    name = data.get("name")
+    description = data.get("description")
+    in_diet = data.get("in_diet")
+
+    if meal is None:
+        return jsonify({"message": "Meal not found!"}), 404
+
+    if not name or not description:
+        return jsonify({"message": "Name or description cannot be empty!"}), 400
+
+    if not in_diet:
+        return jsonify({"message": "diet cannot be empty!"}), 400
+
+    meal.name = data.get('name', meal.name)
+    meal.description = data.get('description', meal.description)
+    meal.in_diet = data.get('in_diet', meal.in_diet)
+
+    db.session.commit()
+
+    return jsonify({"message": "Meal updated with success!"})
+
+
+@app.route("/diet/<int:id>", methods=["DELETE"])
+def delete_meal(id):
+    meal = Meal.query.get(id)
+
+    if meal is None:
+        return jsonify({"message": "Meal not found!"}), 404
+
+    db.session.delete(meal)
+    db.session.commit()
+
+    return jsonify({"message": "Meal deleted with success!"})
 
 
 if __name__ == "__main__":
